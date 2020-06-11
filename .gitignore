@@ -2,3 +2,5 @@
 Scripts/
 Lib/
 Include/
+*.jpg
+*.png
