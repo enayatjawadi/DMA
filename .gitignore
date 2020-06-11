@@ -1,2 +1,4 @@
 .gitignore
-
+Scripts/
+Lib/
+Include/
