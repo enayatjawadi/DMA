@@ -14,11 +14,11 @@
    <string>MainWindow</string>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <widget class="QPushButton" name="pushButton">
+   <widget class="QPushButton" name="review">
     <property name="geometry">
      <rect>
-      <x>180</x>
-      <y>200</y>
+      <x>290</x>
+      <y>190</y>
       <width>211</width>
       <height>181</height>
      </rect>
@@ -27,17 +27,56 @@
      <string>Review</string>
     </property>
    </widget>
-   <widget class="QPushButton" name="pushButton_2">
+   <widget class="QPushButton" name="newCard">
     <property name="geometry">
      <rect>
-      <x>420</x>
-      <y>200</y>
-      <width>211</width>
-      <height>181</height>
+      <x>580</x>
+      <y>40</y>
+      <width>121</width>
+      <height>111</height>
      </rect>
     </property>
     <property name="text">
      <string>New card</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="thesaurus">
+    <property name="geometry">
+     <rect>
+      <x>90</x>
+      <y>40</y>
+      <width>121</width>
+      <height>111</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>thesaurus</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="packages">
+    <property name="geometry">
+     <rect>
+      <x>90</x>
+      <y>410</y>
+      <width>121</width>
+      <height>111</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>packages</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="viewBox">
+    <property name="geometry">
+     <rect>
+      <x>580</x>
+      <y>410</y>
+      <width>121</width>
+      <height>111</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>View Box</string>
     </property>
    </widget>
   </widget>

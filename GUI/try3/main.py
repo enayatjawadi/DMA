@@ -3,6 +3,6 @@ from PyQt5 import QtWidgets, uic
 
 app = QtWidgets.QApplication(sys.argv)
 
-window = uic.loadUi("mainwindow.ui")
+window = uic.loadUi("addwindow.ui")
 window.show()
 app.exec()
