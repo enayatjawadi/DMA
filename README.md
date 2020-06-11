@@ -2,7 +2,7 @@
 digital memory assistant
 
 - [ ] DB structure
-- [ ] Get started with QT design
+- [x] Get started with QT design
 - [ ] First view design - Buttons: review, add card, thesaurus, packages, reminder
 - [ ] implement add
 - [ ] image picker and displayer
