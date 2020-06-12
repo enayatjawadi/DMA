@@ -25,8 +25,8 @@
         <rect>
          <x>0</x>
          <y>0</y>
-         <width>2396</width>
-         <height>1615</height>
+         <width>780</width>
+         <height>539</height>
         </rect>
        </property>
        <property name="sizePolicy">
@@ -58,12 +58,25 @@
            </widget>
           </item>
           <item>
+           <widget class="QCheckBox" name="checkBox">
+            <property name="text">
+             <string>Picture-only card</string>
+            </property>
+           </widget>
+          </item>
+          <item>
            <widget class="QLabel" name="AnswerLabel">
             <property name="sizePolicy">
-             <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+             <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
               <horstretch>0</horstretch>
               <verstretch>0</verstretch>
              </sizepolicy>
+            </property>
+            <property name="minimumSize">
+             <size>
+              <width>375</width>
+              <height>0</height>
+             </size>
             </property>
             <property name="font">
              <font>
@@ -101,9 +114,6 @@
             <property name="text">
              <string/>
             </property>
-            <property name="pixmap">
-             <pixmap>Images/olaf1.jpg</pixmap>
-            </property>
             <property name="alignment">
              <set>Qt::AlignCenter</set>
             </property>
@@ -119,9 +129,6 @@
             </property>
             <property name="text">
              <string/>
-            </property>
-            <property name="pixmap">
-             <pixmap>Images/olaf2.jpg</pixmap>
             </property>
             <property name="alignment">
              <set>Qt::AlignCenter</set>

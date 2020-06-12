@@ -2,3 +2,8 @@
 Scripts/
 Lib/
 Include/
+*.jpg
+*.png
+add2.py
+.add2.py~
+.add2.py.un~

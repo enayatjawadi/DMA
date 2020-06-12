@@ -13,8 +13,26 @@ from shutil import copyfile
 from random import seed
 from random import randint
 import os.path
+from PIL import Image
+from PIL.ExifTags import TAGS
+import piexif
+import re, string
+
 
 class Ui_MainWindow(QMainWindow):
+
+    def qName(self, txt):
+        pattern = re.compile('[^a-zA-Z]')
+        print(pattern.sub('', txt))
+        return pattern.sub('',txt)
+
+    def findOrientation(self, image):
+        if "exif" in image.info:
+            exif_dict = piexif.load(image.info["exif"])
+            if piexif.ImageIFD.Orientation in exif_dict["0th"]:
+                orientation = exif_dict["0th"].pop(piexif.ImageIFD.Orientation)
+                print("Orientation: "+str(orientation))
+                return orientation
 
     def clearForm(self):
         print("Clear clicked")
@@ -41,7 +59,7 @@ class Ui_MainWindow(QMainWindow):
 
     def pickQuestionImage(self, other):
         if(self.pictureCard == False):
-            self.question = self.questionText.toPlainText()
+            self.question = self.qName(self.questionText.toPlainText())
         dst = "Images/"+self.question+"_front.jpg"
         dst2 = "Images/"+self.question+"_back.jpg"
         if(len(self.questionText.toPlainText()) == 0 and self.pictureCard == False):
@@ -51,55 +69,101 @@ class Ui_MainWindow(QMainWindow):
             err.setStandardButtons(QMessageBox.Ok)
             err.exec_()
 
-        elif (os.path.exists(dst) and self.pictureCard == False):
+        elif (os.path.exists(dst) and self.pictureCard == False and self.qPictureSet == False):
             """ Tell the suer the word already exists in the database """
             err = QMessageBox()
             err.setText("You already have this question, try another one")
             err.setWindowTitle("Duplicate question")
             err.setStandardButtons(QMessageBox.Ok)
             err.exec_()
-        elif ((os.path.exists(dst) or os.path.exists(dst2)) and self.pictureCard == True and aPictureSet == False):
+        elif (os.path.exists(dst) and self.qPictureSet == True):
+            #remove the previous photo from Images directory, then copy the new one
+            filename = QFileDialog.getOpenFileName(self, 'Open file', '/home', "Image files (*.jpg *.png)")
+            if(filename[0]):
+                os.remove(dst)
+                copyfile(filename[0], dst)
+                image = Image.open(filename[0])
+                pixmp = QtGui.QPixmap(dst).scaled(311, 901, QtCore.Qt.KeepAspectRatio, QtCore.Qt.FastTransformation)
+                if self.findOrientation(image) == 6:
+                    pixmp = pixmp.transformed(QtGui.QTransform().rotate(90))
+                elif self.findOrientation(image) == 8:
+                    pixmp = pixmp.transformed(QtGui.QTransform().rotate(-90))
+
+                self.qPicture_2.setPixmap(pixmp)
+                self.qPictureSet = True
+
+        elif ((os.path.exists(dst) or os.path.exists(dst2)) and self.pictureCard == True and self.aPictureSet == False):
             print("Original: "+dst+"  "+dst2)
-  #          seed(2)
             self.question = ""+str(randint(10000, 100000000))
             dst = "Images/"+self.question+"_front.jpg"
             print( '2 '+dst)
             filename = QFileDialog.getOpenFileName(self, 'Open file', '/home', "Image files (*.jpg *.png)")
             if filename[0]:
                 copyfile(filename[0], dst)
-                pixmp = QtGui.QPixmap(dst).scaled(311, 201, QtCore.Qt.KeepAspectRatio, QtCore.Qt.FastTransformation)
+                image = Image.open(filename[0])
+                pixmp = QtGui.QPixmap(dst).scaled(311, 901, QtCore.Qt.KeepAspectRatio, QtCore.Qt.FastTransformation)
+                if self.findOrientation(image) == 6:
+                    pixmp = pixmp.transformed(QtGui.QTransform().rotate(90))
+                elif self.findOrientation(image) == 8:
+                    pixmp = pixmp.transformed(QtGui.QTransform().rotate(-90))
+
+
                 self.qPicture_2.setPixmap(pixmp)
-                qPictureSet = True
+                self.qPictureSet = True
         
-        elif ((os.path.exists(dst) or os.path.exists(dst2)) and self.pictureCard == True and aPictureSet == True):
+        elif (os.path.exists(dst2) and self.aPictureSet == True and self.qPictureSet == False):
+#            os.remove(dst)
             filename = QFileDialog.getOpenFileName(self, 'Open file', '/home', "Image files (*.jpg *.png)")
             if(filename[0]):
                 copyfile(filename[0], dst)
-                pixmp = QtGui.QPixmap(dst).scaled(311, 201, QtCore.Qt.KeepAspectRatio, QtCore.Qt.FastTransformation)
+                image = Image.open(filename[0])
+                pixmp = QtGui.QPixmap(dst).scaled(311, 901, QtCore.Qt.KeepAspectRatio, QtCore.Qt.FastTransformation)
+                if self.findOrientation(image) == 6:
+                    pixmp = pixmp.transformed(QtGui.QTransform().rotate(90))
+                elif self.findOrientation(image) == 8:
+                    pixmp = pixmp.transformed(QtGui.QTransform().rotate(-90))
+
                 self.qPicture_2.setPixmap(pixmp)
-                qPictureSet = True
+                self.qPictureSet = True
 
         elif (os.path.exists(dst) == False and self.pictureCard == False):
             print('3 '+dst)
             filename = QFileDialog.getOpenFileName(self, 'Open file', '/home', "Image files (*.jpg *.png)")
             if filename[0]:
                 copyfile(filename[0], dst)
-                pixmp = QtGui.QPixmap(dst).scaled(311, 201, QtCore.Qt.KeepAspectRatio, QtCore.Qt.FastTransformation)
+                image = Image.open(filename[0])
+                pixmp = QtGui.QPixmap(dst).scaled(311, 901, QtCore.Qt.KeepAspectRatio, QtCore.Qt.FastTransformation)
+                if self.findOrientation(image) == 6:
+                    pixmp = pixmp.transformed(QtGui.QTransform().rotate(90))
+                elif self.findOrientation(image) == 8:
+                    pixmp = pixmp.transformed(QtGui.QTransform().rotate(-90))
+
+
                 self.qPicture_2.setPixmap(pixmp)
-                qPictureSet = True
+                self.qPictureSet = True
         elif (os.path.exists(dst) == False and os.path.exists(dst2) == False and self.pictureCard == True):
             print('4 '+dst)
             filename = QFileDialog.getOpenFileName(self, 'Open file', '/home', "Image files (*.jpg *.png)")
             if(filename[0]):
                 copyfile(filename[0], dst)
-                pixmp = QtGui.QPixmap(dst).scaled(311, 201, QtCore.Qt.KeepAspectRatio, QtCore.Qt.FastTransformation)
-                self.qPicture_2.setPixmap(pixmp)
-                qPictureSet = True
+                image = Image.open(filename[0])
+                pixmp = QtGui.QPixmap(dst).scaled(311, 901, QtCore.Qt.KeepAspectRatio, QtCore.Qt.FastTransformation)
+                if self.findOrientation(image) == 6:
+                    pixmp = pixmp.transformed(QtGui.QTransform().rotate(90))
+                elif self.findOrientation(image) == 8:
+                    pixmp = pixmp.transformed(QtGui.QTransform().rotate(-90))
 
+
+#                pixmp = QtGui.QPixmap(dst).scaledToWidth(311, QtCore.Qt.FastTransformation)
+                self.qPicture_2.setPixmap(pixmp)
+                self.qPictureSet = True
+
+
+    
 
     def pickAnswerImage(self, other):
         if(self.pictureCard == False):
-            self.question = self.questionText.toPlainText()
+            self.question = self.qName(self.questionText.toPlainText())
         dst = "Images/"+self.question+"_back.jpg"
         dst2 = "Images/"+self.question+"_front.jpg"
 
@@ -110,50 +174,94 @@ class Ui_MainWindow(QMainWindow):
             err.setStandardButtons(QMessageBox.Ok)
             err.exec_()
 
-        elif (os.path.exists(dst) and self.pictureCard == False):
+        elif (os.path.exists(dst) and self.pictureCard == False and self.aPictureSet == False):
             """ tell the user to change the word """
             err = QMessageBox()
             err.setText("You already have this question, try another one")
             err.setWindowTitle("Duplicate question")
             err.setStandardButtons(QMessageBox.Ok)
             err.exec_()
+        elif (os.path.exists(dst) and self.aPictureSet == True):
+            filename = QFileDialog.getOpenFileName(self, 'Open file', '/home', "Image files (*.jpg *.png)")
+            if filename[0]:
+                os.remove(dst)
+                copyfile(filename[0], dst)
+                image = Image.open(filename[0])
+                pixmp2 = QtGui.QPixmap(dst).scaled(311, 901, QtCore.Qt.KeepAspectRatio, QtCore.Qt.FastTransformation)
+                if self.findOrientation(image) == 6:
+                    pixmp2 = pixmp2.transformed(QtGui.QTransform().rotate(90))
+                elif self.findOrientation(image) == 8:
+                    pixmp2 = pixmp2.transformed(QtGui.QTransform().rotate(-90))
+
+                self.aPicture_2.setPixmap(pixmp2)
+                self.aPictureSet = True
+
         elif (os.path.exists(dst) == False and self.pictureCard == False):
             print('2')
-            filename = QFileDialog.getOpenFileName(self, 'Open file', '/home', "Image files (*.jpg *.jpg)")
+            filename = QFileDialog.getOpenFileName(self, 'Open file', '/home', "Image files (*.jpg *.png)")
             if filename[0]:
                 copyfile(filename[0], dst)
-                pixmp2 = QtGui.QPixmap(dst).scaled(311, 201, QtCore.Qt.KeepAspectRatio, QtCore.Qt.FastTransformation)
+                image = Image.open(filename[0])
+                pixmp2 = QtGui.QPixmap(dst).scaled(311, 901, QtCore.Qt.KeepAspectRatio, QtCore.Qt.FastTransformation)
+                if self.findOrientation(image) == 6:
+                    pixmp2 = pixmp2.transformed(QtGui.QTransform().rotate(90))
+                elif self.findOrientation(image) == 8:
+                    pixmp2 = pixmp2.transformed(QtGui.QTransform().rotate(-90))
+
+
                 self.aPicture_2.setPixmap(pixmp2)
-                aPictureSet = True
-        elif ((os.path.exists(dst) or os.path.exists(dst2)) and self.pictureCard == True and self.qPictureSet == False):
+                self.aPictureSet = True
+        elif ((os.path.exists(dst) or os.path.exists(dst2)) and self.pictureCard == True and self.qPictureSet == False and self.aPictureSet == False):
             print('3 '+dst)
  #           seed(2)
-            self.question = ""+str(randint(10000, 1000000))+str(self.qPictureSet)
+            self.question = ""+str(randint(10000, 1000000))
             dst = "Images/"+self.question+"_back.jpg"
             print("After modification: "+self.question)
             filename = QFileDialog.getOpenFileName(self, 'Open file', '/home', "Image files (*.jpg *.png)")
             if(filename[0]):
                 copyfile(filename[0], dst)
-                pixmp2 = QtGui.QPixmap(dst).scaled(311, 201, QtCore.Qt.KeepAspectRatio, QtCore.Qt.FastTransformation)
+                image = Image.open(filename[0])
+                pixmp2 = QtGui.QPixmap(dst).scaled(311, 901, QtCore.Qt.KeepAspectRatio, QtCore.Qt.FastTransformation)
+                if self.findOrientation(image) == 6:
+                    pixmp2 = pixmp2.transformed(QtGui.QTransform().rotate(90))
+                elif self.findOrientation(image) == 8:
+                    pixmp2 = pixmp2.transformed(QtGui.QTransform().rotate(-90))
+
+
                 self.aPicture_2.setPixmap(pixmp2)
-                aPictureSet = True
+                self.aPictureSet = True
         
-        elif ((os.path.exists(dst) or os.path.exists(dst2)) and self.pictureCard == True and self.qPictureSet == True):
+        elif (os.path.exists(dst2) and self.pictureCard == True and self.qPictureSet == True and self.aPictureSet == False):
             filename = QFileDialog.getOpenFileName(self, 'Open file', '/home', "Image files (*.jpg *.png)")
             if(filename[0]):
                 copyfile(filename[0], dst)
-                pixmp2 = QtGui.QPixmap(dst).scaled(311, 201, QtCore.Qt.KeepAspectRatio, QtCore.Qt.FastTransformation)
+                image = Image.open(filename[0])
+
+                pixmp2 = QtGui.QPixmap(dst).scaled(311, 901, QtCore.Qt.KeepAspectRatio, QtCore.Qt.FastTransformation)
+                if self.findOrientation(image) == 6:
+                    pixmp2 = pixmp2.transformed(QtGui.QTransform().rotate(90))
+                elif self.findOrientation(image) == 8:
+                    pixmp2 = pixmp2.transformed(QtGui.QTransform().rotate(-90))
+
+                    
                 self.aPicture_2.setPixmap(pixmp2)
-                aPictureSet = True
+                self.aPictureSet = True
 
         elif (os.path.exists(dst) == False and os.path.exists(dst2) == False and self.pictureCard == True):
             print('4 '+dst)
             filename = QFileDialog.getOpenFileName(self, 'Open file', '/home', "Image files (*.jpg *.png)")
             if(filename[0]):
                 copyfile(filename[0], dst)
-                pixmp2 = QtGui.QPixmap(dst).scaled(311, 201, QtCore.Qt.KeepAspectRatio, QtCore.Qt.FastTransformation)
+                image = Image.open(filename[0])
+                pixmp2 = QtGui.QPixmap(dst).scaled(311, 901, QtCore.Qt.KeepAspectRatio, QtCore.Qt.FastTransformation)
+                if self.findOrientation(image) == 6:
+                    pixmp2 = pixmp2.transformed(QtGui.QTransform().rotate(90))
+                elif self.findOrientation(image) == 8:
+                    pixmp2 = pixmp2.transformed(QtGui.QTransform().rotate(-90))
+
+
                 self.aPicture_2.setPixmap(pixmp2)
-                aPictureSet = True
+                self.aPictureSet = True
 
     def enter_data(self):
         # TODO should rename the pictures if the question text or pictureCard flag has been changed (compare the file names and rename the pictures if necessary
@@ -197,6 +305,17 @@ class Ui_MainWindow(QMainWindow):
         self.scrollAreaWidgetContents_3.setObjectName("scrollAreaWidgetContents_3")
         self.verticalLayout_3 = QtWidgets.QVBoxLayout(self.scrollAreaWidgetContents_3)
         self.verticalLayout_3.setObjectName("verticalLayout_3")
+
+        
+        self.justPicture = QCheckBox("Picture-only card")
+        self.justPicture.setSizePolicy(sizePolicy)
+        font = QtGui.QFont()
+        font.setFamily("Calibri")
+        font.setPointSize(12)
+        self.justPicture.setFont(font)
+        self.justPicture.stateChanged.connect(self.pictureCardCheck)
+        self.verticalLayout_3.addWidget(self.justPicture)
+
         self.horizontalLayout = QtWidgets.QHBoxLayout()
         self.horizontalLayout.setObjectName("horizontalLayout")
         self.qestionLabel = QtWidgets.QLabel(self.scrollAreaWidgetContents_3)
@@ -205,25 +324,18 @@ class Ui_MainWindow(QMainWindow):
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.qestionLabel.sizePolicy().hasHeightForWidth())
         self.qestionLabel.setSizePolicy(sizePolicy)
-        font = QtGui.QFont()
-        font.setFamily("Calibri")
-        font.setPointSize(12)
         self.qestionLabel.setFont(font)
         self.qestionLabel.setObjectName("qestionLabel")
         self.horizontalLayout.addWidget(self.qestionLabel)
         
-        self.justPicture = QCheckBox("Picture-only card")
-        self.justPicture.setSizePolicy(sizePolicy)
-        self.justPicture.setFont(font)
-        self.justPicture.stateChanged.connect(self.pictureCardCheck)
-        self.horizontalLayout.addWidget(self.justPicture)
 
         self.AnswerLabel = QtWidgets.QLabel(self.scrollAreaWidgetContents_3)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Preferred)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.AnswerLabel.sizePolicy().hasHeightForWidth())
         self.AnswerLabel.setSizePolicy(sizePolicy)
+        self.AnswerLabel.setMinimumSize(QtCore.QSize(375, 0))
         font = QtGui.QFont()
         font.setFamily("Calibri")
         font.setPointSize(12)
@@ -236,27 +348,38 @@ class Ui_MainWindow(QMainWindow):
         self.questionText = QtWidgets.QTextEdit(self.scrollAreaWidgetContents_3)
         self.questionText.setObjectName("questionText")
         self.horizontalLayout_2.addWidget(self.questionText)
-        self.answerText = QtWidgets.QTextEdit(self.scrollAreaWidgetContents_3)
-        self.answerText.setObjectName("answerText")
-        self.horizontalLayout_2.addWidget(self.answerText)
-        self.verticalLayout_3.addLayout(self.horizontalLayout_2)
+
         self.horizontalLayout_3 = QtWidgets.QHBoxLayout()
         self.horizontalLayout_3.setObjectName("horizontalLayout_3")
+
         self.qPicture_2 = QtWidgets.QLabel(self.scrollAreaWidgetContents_3)
+#        self.qPicture_2.setFixedSize(311, 800)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Preferred)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.qPicture_2.sizePolicy().hasHeightForWidth())
+        sizePolicy.setWidthForHeight(self.qPicture_2.sizePolicy().hasWidthForHeight())
         self.qPicture_2.setSizePolicy(sizePolicy)
         self.qPicture_2.setText("")
-        self.pixmap = QtGui.QPixmap("Images/olaf1.jpg").scaled(311, 201, QtCore.Qt.KeepAspectRatio, QtCore.Qt.FastTransformation)
+#        self.image = QtGui.QImage("Images/olaf1.jpg")
+        self.image = Image.open("Images/olaf1.jpg")
+#        exif = self.image.getexif()
+        self.pixmap = QtGui.QPixmap("Images/olaf1.jpg").scaled(311, 1011, QtCore.Qt.KeepAspectRatio, QtCore.Qt.FastTransformation)
+        orientation = self.findOrientation(self.image)
+        if orientation == 6:
+            self.pixmap = self.pixmap.transformed(QtGui.QTransform().rotate(90))
         self.qPicture_2.setPixmap(self.pixmap)
+        #self.qPicture_2.setScaledContents(True)
         self.qPicture_2.setAlignment(QtCore.Qt.AlignCenter)
         self.qPicture_2.setObjectName("qPicture_2")
-
         self.qPicture_2.mouseReleaseEvent = self.pickQuestionImage
-
         self.horizontalLayout_3.addWidget(self.qPicture_2)
+
+
+        self.answerText = QtWidgets.QTextEdit(self.scrollAreaWidgetContents_3)
+        self.answerText.setObjectName("answerText")
+        self.horizontalLayout_2.addWidget(self.answerText)
+
+
         self.aPicture_2 = QtWidgets.QLabel(self.scrollAreaWidgetContents_3)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Preferred)
         sizePolicy.setHorizontalStretch(0)
@@ -264,7 +387,7 @@ class Ui_MainWindow(QMainWindow):
         sizePolicy.setHeightForWidth(self.aPicture_2.sizePolicy().hasHeightForWidth())
         self.aPicture_2.setSizePolicy(sizePolicy)
         self.aPicture_2.setText("")
-        self.pixmap2 = QtGui.QPixmap("Images/olaf2.jpg").scaled(311, 201, QtCore.Qt.KeepAspectRatio, QtCore.Qt.FastTransformation)
+        self.pixmap2 = QtGui.QPixmap("Images/olaf2.jpg").scaled(311, 1011, QtCore.Qt.KeepAspectRatio, QtCore.Qt.FastTransformation)
         self.aPicture_2.setPixmap(self.pixmap2)
         self.aPicture_2.setAlignment(QtCore.Qt.AlignCenter)
         self.aPicture_2.setObjectName("aPicture_2")
@@ -272,6 +395,8 @@ class Ui_MainWindow(QMainWindow):
         self.aPicture_2.mouseReleaseEvent = self.pickAnswerImage
         
         self.horizontalLayout_3.addWidget(self.aPicture_2)
+
+        self.verticalLayout_3.addLayout(self.horizontalLayout_2)
         self.verticalLayout_3.addLayout(self.horizontalLayout_3)
         self.horizontalLayout_4 = QtWidgets.QHBoxLayout()
         self.horizontalLayout_4.setObjectName("horizontalLayout_4")
