@@ -7,7 +7,7 @@ digital memory assistant
 - [ ] Implement add
 - [x] Correct picture orientation
 - [x] Process the question to just have alphanumerical characters before assigning it to the name of the picture.
-- [ ] Remember the last directory for picking the image in add card
+- [x] Remember the last directory for picking the image in add card
 - [X] Combo boxs for selecting the position for the card to be added to
 - [ ] Add read button for the question
 - [x] Image picker and displayer

@@ -146,7 +146,7 @@ class Ui_MainWindow(QMainWindow):
             err.exec_()
         elif (os.path.exists(dst) and self.qPictureSet == True):
             #remove the previous photo from Images directory, then copy the new one
-            filename = QFileDialog.getOpenFileName(self, 'Open file', '/home', "Image files (*.jpg *.png)")
+            filename = QFileDialog.getOpenFileName(self, 'Open file', self.picPath, "Image files (*.jpg *.png)")
             if(filename[0]):
                 os.remove(dst)
                 copyfile(filename[0], dst)
@@ -219,6 +219,10 @@ class Ui_MainWindow(QMainWindow):
                     pixmp = pixmp.transformed(QtGui.QTransform().rotate(90))
                 elif self.findOrientation(image) == 8:
                     pixmp = pixmp.transformed(QtGui.QTransform().rotate(-90))
+                picname = os.path.basename(filename[0])
+                print(picname)
+                picpath = filename[0].replace(picname, "")
+                print(picpath)
 
 
                 self.qPicture_2.setPixmap(pixmp)
@@ -345,8 +349,12 @@ class Ui_MainWindow(QMainWindow):
 
     def enter_data(self):
         # TODO should rename the pictures if the question text or pictureCard flag has been changed (compare the file names and rename the pictures if necessary
+
+        # TODO if the boxPart and partSection comboBoxes are not selected (0, 0) => the card should go to the first level first deck
+
         pass
 
+    
     def pictureCardCheck(self):
         if(self.justPicture.isChecked()):
             self.questionText.setReadOnly(True)
@@ -367,6 +375,7 @@ class Ui_MainWindow(QMainWindow):
         self.qPictureSet = False
         self.aPictureSet = False
         self.qwidget = self
+        self.picPath = '/home'
         self.centralwidget = QtWidgets.QWidget(MainWindow)
         self.centralwidget.setObjectName("centralwidget")
         self.verticalLayout = QtWidgets.QVBoxLayout(self.centralwidget)

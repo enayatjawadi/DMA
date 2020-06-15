@@ -146,7 +146,7 @@ class Ui_MainWindow(QMainWindow):
             err.exec_()
         elif (os.path.exists(dst) and self.qPictureSet == True):
             #remove the previous photo from Images directory, then copy the new one
-            filename = QFileDialog.getOpenFileName(self, 'Open file', '/home', "Image files (*.jpg *.png)")
+            filename = QFileDialog.getOpenFileName(self, 'Open file', self.picPath, "Image files (*.jpg *.png)")
             if(filename[0]):
                 os.remove(dst)
                 copyfile(filename[0], dst)
@@ -156,6 +156,9 @@ class Ui_MainWindow(QMainWindow):
                     pixmp = pixmp.transformed(QtGui.QTransform().rotate(90))
                 elif self.findOrientation(image) == 8:
                     pixmp = pixmp.transformed(QtGui.QTransform().rotate(-90))
+                picname = os.path.basename(filename[0])
+                picpath = filename[0].replace(picname, "")
+                self.picPath = picpath
 
                 self.qPicture_2.setPixmap(pixmp)
                 self.qPictureSet = True
@@ -165,7 +168,7 @@ class Ui_MainWindow(QMainWindow):
             self.question = ""+str(randint(10000, 100000000))
             dst = "Images/"+self.question+"_front.jpg"
             print( '2 '+dst)
-            filename = QFileDialog.getOpenFileName(self, 'Open file', '/home', "Image files (*.jpg *.png)")
+            filename = QFileDialog.getOpenFileName(self, 'Open file', self.picPath, "Image files (*.jpg *.png)")
             if filename[0]:
                 copyfile(filename[0], dst)
                 image = Image.open(filename[0])
@@ -175,12 +178,15 @@ class Ui_MainWindow(QMainWindow):
                 elif self.findOrientation(image) == 8:
                     pixmp = pixmp.transformed(QtGui.QTransform().rotate(-90))
 
+                picname = os.path.basename(filename[0])
+                picpath = filename[0].replace(picname, "")
+                self.picPath = picpath
 
                 self.qPicture_2.setPixmap(pixmp)
                 self.qPictureSet = True
         
         elif (os.path.exists(dst2) and self.aPictureSet == True and self.qPictureSet == False):
-            filename = QFileDialog.getOpenFileName(self, 'Open file', '/home', "Image files (*.jpg *.png)")
+            filename = QFileDialog.getOpenFileName(self, 'Open file', self.picPath, "Image files (*.jpg *.png)")
             if(filename[0]):
                 copyfile(filename[0], dst)
                 image = Image.open(filename[0])
@@ -190,12 +196,15 @@ class Ui_MainWindow(QMainWindow):
                 elif self.findOrientation(image) == 8:
                     pixmp = pixmp.transformed(QtGui.QTransform().rotate(-90))
 
+                picname = os.path.basename(filename[0])
+                picpath = filename[0].replace(picname, "")
+                self.picPath = picpath
                 self.qPicture_2.setPixmap(pixmp)
                 self.qPictureSet = True
 
         elif (os.path.exists(dst) == False and self.pictureCard == False):
             print('3 '+dst)
-            filename = QFileDialog.getOpenFileName(self, 'Open file', '/home', "Image files (*.jpg *.png)")
+            filename = QFileDialog.getOpenFileName(self, 'Open file', self.picPath, "Image files (*.jpg *.png)")
             if filename[0]:
                 copyfile(filename[0], dst)
                 image = Image.open(filename[0])
@@ -206,11 +215,14 @@ class Ui_MainWindow(QMainWindow):
                     pixmp = pixmp.transformed(QtGui.QTransform().rotate(-90))
 
 
+                picname = os.path.basename(filename[0])
+                picpath = filename[0].replace(picname, "")
+                self.picPath = picpath
                 self.qPicture_2.setPixmap(pixmp)
                 self.qPictureSet = True
         elif (os.path.exists(dst) == False and os.path.exists(dst2) == False and self.pictureCard == True):
             print('4 '+dst)
-            filename = QFileDialog.getOpenFileName(self, 'Open file', '/home', "Image files (*.jpg *.png)")
+            filename = QFileDialog.getOpenFileName(self, 'Open file', self.picPath, "Image files (*.jpg *.png)")
             if(filename[0]):
                 copyfile(filename[0], dst)
                 image = Image.open(filename[0])
@@ -219,7 +231,10 @@ class Ui_MainWindow(QMainWindow):
                     pixmp = pixmp.transformed(QtGui.QTransform().rotate(90))
                 elif self.findOrientation(image) == 8:
                     pixmp = pixmp.transformed(QtGui.QTransform().rotate(-90))
-
+                picname = os.path.basename(filename[0])
+                picpath = filename[0].replace(picname, "")
+                self.picPath = picpath
+               
 
                 self.qPicture_2.setPixmap(pixmp)
                 self.qPictureSet = True
@@ -247,7 +262,7 @@ class Ui_MainWindow(QMainWindow):
             err.setStandardButtons(QMessageBox.Ok)
             err.exec_()
         elif (os.path.exists(dst) and self.aPictureSet == True):
-            filename = QFileDialog.getOpenFileName(self, 'Open file', '/home', "Image files (*.jpg *.png)")
+            filename = QFileDialog.getOpenFileName(self, 'Open file', self.picPath, "Image files (*.jpg *.png)")
             if filename[0]:
                 os.remove(dst)
                 copyfile(filename[0], dst)
@@ -258,12 +273,15 @@ class Ui_MainWindow(QMainWindow):
                 elif self.findOrientation(image) == 8:
                     pixmp2 = pixmp2.transformed(QtGui.QTransform().rotate(-90))
 
+                picname = os.path.basename(filename[0])
+                picpath = filename[0].replace(picname, "")
+                self.picPath = picpath
                 self.aPicture_2.setPixmap(pixmp2)
                 self.aPictureSet = True
 
         elif (os.path.exists(dst) == False and self.pictureCard == False):
             print('2')
-            filename = QFileDialog.getOpenFileName(self, 'Open file', '/home', "Image files (*.jpg *.png)")
+            filename = QFileDialog.getOpenFileName(self, 'Open file', self.picPath, "Image files (*.jpg *.png)")
             if filename[0]:
                 copyfile(filename[0], dst)
                 image = Image.open(filename[0])
@@ -274,6 +292,9 @@ class Ui_MainWindow(QMainWindow):
                     pixmp2 = pixmp2.transformed(QtGui.QTransform().rotate(-90))
 
 
+                picname = os.path.basename(filename[0])
+                picpath = filename[0].replace(picname, "")
+                self.picPath = picpath
                 self.aPicture_2.setPixmap(pixmp2)
                 self.aPictureSet = True
         elif ((os.path.exists(dst) or os.path.exists(dst2)) and self.pictureCard == True and self.qPictureSet == False and self.aPictureSet == False):
@@ -281,7 +302,7 @@ class Ui_MainWindow(QMainWindow):
             self.question = ""+str(randint(10000, 1000000))
             dst = "Images/"+self.question+"_back.jpg"
             print("After modification: "+self.question)
-            filename = QFileDialog.getOpenFileName(self, 'Open file', '/home', "Image files (*.jpg *.png)")
+            filename = QFileDialog.getOpenFileName(self, 'Open file', self.picPath, "Image files (*.jpg *.png)")
             if(filename[0]):
                 copyfile(filename[0], dst)
                 image = Image.open(filename[0])
@@ -292,11 +313,14 @@ class Ui_MainWindow(QMainWindow):
                     pixmp2 = pixmp2.transformed(QtGui.QTransform().rotate(-90))
 
 
+                picname = os.path.basename(filename[0])
+                picpath = filename[0].replace(picname, "")
+                self.picPath = picpath
                 self.aPicture_2.setPixmap(pixmp2)
                 self.aPictureSet = True
         
         elif (os.path.exists(dst2) and self.pictureCard == True and self.qPictureSet == True and self.aPictureSet == False):
-            filename = QFileDialog.getOpenFileName(self, 'Open file', '/home', "Image files (*.jpg *.png)")
+            filename = QFileDialog.getOpenFileName(self, 'Open file', self.picPath, "Image files (*.jpg *.png)")
             if(filename[0]):
                 copyfile(filename[0], dst)
                 image = Image.open(filename[0])
@@ -306,13 +330,16 @@ class Ui_MainWindow(QMainWindow):
                     pixmp2 = pixmp2.transformed(QtGui.QTransform().rotate(90))
                 elif self.findOrientation(image) == 8:
                     pixmp2 = pixmp2.transformed(QtGui.QTransform().rotate(-90))
+                picname = os.path.basename(filename[0])
+                picpath = filename[0].replace(picname, "")
+                self.picPath = picpath
 
                 self.aPicture_2.setPixmap(pixmp2)
                 self.aPictureSet = True
 
         elif (os.path.exists(dst) == False and os.path.exists(dst2) == False and self.pictureCard == True):
             print('4 '+dst)
-            filename = QFileDialog.getOpenFileName(self, 'Open file', '/home', "Image files (*.jpg *.png)")
+            filename = QFileDialog.getOpenFileName(self, 'Open file', self.picPath, "Image files (*.jpg *.png)")
             if(filename[0]):
                 copyfile(filename[0], dst)
                 image = Image.open(filename[0])
@@ -321,7 +348,9 @@ class Ui_MainWindow(QMainWindow):
                     pixmp2 = pixmp2.transformed(QtGui.QTransform().rotate(90))
                 elif self.findOrientation(image) == 8:
                     pixmp2 = pixmp2.transformed(QtGui.QTransform().rotate(-90))
-
+                picname = os.path.basename(filename[0])
+                picpath = filename[0].replace(picname, "")
+                self.picPath = picpath
                 self.aPicture_2.setPixmap(pixmp2)
                 self.aPictureSet = True
 
@@ -371,6 +400,7 @@ class Ui_MainWindow(QMainWindow):
         self.qPictureSet = False
         self.aPictureSet = False
         self.qwidget = self
+        self.picPath = '/home'
         self.centralwidget = QtWidgets.QWidget(MainWindow)
         self.centralwidget.setObjectName("centralwidget")
         self.verticalLayout = QtWidgets.QVBoxLayout(self.centralwidget)
