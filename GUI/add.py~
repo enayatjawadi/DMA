@@ -17,7 +17,9 @@ from PIL import Image
 from PIL.ExifTags import TAGS
 import piexif
 import re, string
-
+#import pyttsx3
+from gtts import gTTS
+from playsound import playsound
 
 class Ui_MainWindow(QMainWindow):
 
@@ -55,6 +57,72 @@ class Ui_MainWindow(QMainWindow):
         self.packages.addItem("English")
         self.packages.addItem("French")
         self.packages.setCurrentIndex(0)
+
+    def boxPartInit(self):
+        self.partData = []
+        self.boxPart.addItem("Level")
+        self.partData.append("1")
+        self.partData.append("2")
+        self.partData.append("3")
+        self.partData.append("4")
+        self.partData.append("5")
+
+        self.boxPart.addItems(self.partData)
+
+        self.boxPart.setCurrentIndex(0)
+        self.boxPart.model().item(0).setEnabled(False)
+
+    def partSectionInit(self):
+        self.partSection.clear()
+        self.partSection.addItem("Deck")
+#        self.partSection.addItem("1")
+        self.partSection.setCurrentIndex(0)
+        self.partSection.model().item(0).setEnabled(False)
+
+    def sectionUpdate(self, part):
+        self.sectionData = []
+        self.partSection.clear()
+        self.partSection.addItem("Deck")
+        if part == 1:
+            self.sectionData.append("1")
+        elif part == 2:
+            self.sectionData.append("1")
+            self.sectionData.append("2")
+        elif part == 3:
+            self.sectionData.append("1")
+            self.sectionData.append("2")
+            self.sectionData.append("3")
+            self.sectionData.append("4")
+        elif part == 4:
+            self.sectionData.append("1")
+            self.sectionData.append("2")
+            self.sectionData.append("3")
+            self.sectionData.append("4")
+            self.sectionData.append("5")
+            self.sectionData.append("6")
+            self.sectionData.append("7")
+            self.sectionData.append("8")
+        elif part == 5:
+            self.sectionData.append("1")
+            self.sectionData.append("2")
+            self.sectionData.append("3")
+            self.sectionData.append("4")
+            self.sectionData.append("5")
+            self.sectionData.append("6")
+            self.sectionData.append("7")
+            self.sectionData.append("8")
+            self.sectionData.append("9")
+            self.sectionData.append("10")
+            self.sectionData.append("11")
+            self.sectionData.append("12")
+            self.sectionData.append("13")
+            self.sectionData.append("14")
+            self.sectionData.append("15")
+            self.sectionData.append("16")
+
+        self.partSection.addItems(self.sectionData)
+        self.partSection.setCurrentIndex(0)
+        self.partSection.model().item(0).setEnabled(False)
 
 
     def pickQuestionImage(self, other):
@@ -112,7 +180,6 @@ class Ui_MainWindow(QMainWindow):
                 self.qPictureSet = True
         
         elif (os.path.exists(dst2) and self.aPictureSet == True and self.qPictureSet == False):
-#            os.remove(dst)
             filename = QFileDialog.getOpenFileName(self, 'Open file', '/home', "Image files (*.jpg *.png)")
             if(filename[0]):
                 copyfile(filename[0], dst)
@@ -154,10 +221,8 @@ class Ui_MainWindow(QMainWindow):
                     pixmp = pixmp.transformed(QtGui.QTransform().rotate(-90))
 
 
-#                pixmp = QtGui.QPixmap(dst).scaledToWidth(311, QtCore.Qt.FastTransformation)
                 self.qPicture_2.setPixmap(pixmp)
                 self.qPictureSet = True
-
 
     
 
@@ -213,7 +278,6 @@ class Ui_MainWindow(QMainWindow):
                 self.aPictureSet = True
         elif ((os.path.exists(dst) or os.path.exists(dst2)) and self.pictureCard == True and self.qPictureSet == False and self.aPictureSet == False):
             print('3 '+dst)
- #           seed(2)
             self.question = ""+str(randint(10000, 1000000))
             dst = "Images/"+self.question+"_back.jpg"
             print("After modification: "+self.question)
@@ -243,7 +307,6 @@ class Ui_MainWindow(QMainWindow):
                 elif self.findOrientation(image) == 8:
                     pixmp2 = pixmp2.transformed(QtGui.QTransform().rotate(-90))
 
-                    
                 self.aPicture_2.setPixmap(pixmp2)
                 self.aPictureSet = True
 
@@ -259,9 +322,26 @@ class Ui_MainWindow(QMainWindow):
                 elif self.findOrientation(image) == 8:
                     pixmp2 = pixmp2.transformed(QtGui.QTransform().rotate(-90))
 
-
                 self.aPicture_2.setPixmap(pixmp2)
                 self.aPictureSet = True
+
+    def readQuestion(self, other):
+        """
+        converter = pyttsx3.init()
+        converter.setProperty('rate', 150)
+        converter.setProperty('volume', 1)
+
+        converter.say(self.questionText.toPlainText())
+        converter.runAndWait()
+        """
+        ################################
+        """
+        name = self.qName(self.questionText.toPlainText())
+        tts = gTTS(self.questionText.toPlainText(), lang='fr')
+        if os.path.exists(name+".mp3") == False:
+            tts.save(name+".mp3")
+        playsound(name+".mp3")
+        """
 
     def enter_data(self):
         # TODO should rename the pictures if the question text or pictureCard flag has been changed (compare the file names and rename the pictures if necessary
@@ -272,7 +352,6 @@ class Ui_MainWindow(QMainWindow):
             self.questionText.setReadOnly(True)
             self.answerText.setReadOnly(True)
             self.pictureCard = True
-#            seed(1)
             self.question = ""+str(randint(10000, 100000000000))
             print(self.question)
         else:
@@ -306,7 +385,9 @@ class Ui_MainWindow(QMainWindow):
         self.verticalLayout_3 = QtWidgets.QVBoxLayout(self.scrollAreaWidgetContents_3)
         self.verticalLayout_3.setObjectName("verticalLayout_3")
 
-        
+        self.horizontalLayout_0 = QtWidgets.QHBoxLayout()
+        self.horizontalLayout_0.setObjectName("TopHorizontal")
+
         self.justPicture = QCheckBox("Picture-only card")
         self.justPicture.setSizePolicy(sizePolicy)
         font = QtGui.QFont()
@@ -314,8 +395,31 @@ class Ui_MainWindow(QMainWindow):
         font.setPointSize(12)
         self.justPicture.setFont(font)
         self.justPicture.stateChanged.connect(self.pictureCardCheck)
-        self.verticalLayout_3.addWidget(self.justPicture)
+        self.horizontalLayout_0.addWidget(self.justPicture)
 
+        self.boxPart = QtWidgets.QComboBox(self.scrollAreaWidgetContents_3)
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.boxPart.sizePolicy().hasHeightForWidth())
+        self.boxPart.setSizePolicy(sizePolicy)
+        self.boxPart.setObjectName("BoxPart")
+        self.boxPart.currentIndexChanged.connect(self.sectionUpdate)
+        self.horizontalLayout_0.addWidget(self.boxPart)
+
+        self.partSection = QtWidgets.QComboBox(self.scrollAreaWidgetContents_3)
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.partSection.sizePolicy().hasHeightForWidth())
+        self.partSection.setSizePolicy(sizePolicy)
+        self.partSection.setObjectName("BoxPart")
+        self.horizontalLayout_0.addWidget(self.partSection)
+
+
+        self.verticalLayout_3.addLayout(self.horizontalLayout_0)
+
+        
         self.horizontalLayout = QtWidgets.QHBoxLayout()
         self.horizontalLayout.setObjectName("horizontalLayout")
         self.qestionLabel = QtWidgets.QLabel(self.scrollAreaWidgetContents_3)
@@ -326,6 +430,7 @@ class Ui_MainWindow(QMainWindow):
         self.qestionLabel.setSizePolicy(sizePolicy)
         self.qestionLabel.setFont(font)
         self.qestionLabel.setObjectName("qestionLabel")
+        self.qestionLabel.mouseReleaseEvent = self.readQuestion
         self.horizontalLayout.addWidget(self.qestionLabel)
         
 
@@ -353,22 +458,18 @@ class Ui_MainWindow(QMainWindow):
         self.horizontalLayout_3.setObjectName("horizontalLayout_3")
 
         self.qPicture_2 = QtWidgets.QLabel(self.scrollAreaWidgetContents_3)
-#        self.qPicture_2.setFixedSize(311, 800)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Preferred)
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.MinimumExpanding)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setWidthForHeight(self.qPicture_2.sizePolicy().hasWidthForHeight())
         self.qPicture_2.setSizePolicy(sizePolicy)
         self.qPicture_2.setText("")
-#        self.image = QtGui.QImage("Images/olaf1.jpg")
         self.image = Image.open("Images/olaf1.jpg")
-#        exif = self.image.getexif()
         self.pixmap = QtGui.QPixmap("Images/olaf1.jpg").scaled(311, 1011, QtCore.Qt.KeepAspectRatio, QtCore.Qt.FastTransformation)
         orientation = self.findOrientation(self.image)
         if orientation == 6:
             self.pixmap = self.pixmap.transformed(QtGui.QTransform().rotate(90))
         self.qPicture_2.setPixmap(self.pixmap)
-        #self.qPicture_2.setScaledContents(True)
         self.qPicture_2.setAlignment(QtCore.Qt.AlignCenter)
         self.qPicture_2.setObjectName("qPicture_2")
         self.qPicture_2.mouseReleaseEvent = self.pickQuestionImage
@@ -381,7 +482,7 @@ class Ui_MainWindow(QMainWindow):
 
 
         self.aPicture_2 = QtWidgets.QLabel(self.scrollAreaWidgetContents_3)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Preferred)
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.MinimumExpanding)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.aPicture_2.sizePolicy().hasHeightForWidth())
@@ -501,6 +602,8 @@ class Ui_MainWindow(QMainWindow):
 
         self.thesaurusInit()
         self.packageInit()
+        self.boxPartInit()
+        self.partSectionInit()
 
         self.retranslateUi(MainWindow)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
