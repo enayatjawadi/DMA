@@ -20,11 +20,83 @@ import re, string
 #import pyttsx3
 from gtts import gTTS
 from playsound import playsound
+import sqlite3
 
 class Ui_MainWindow(QMainWindow):
 
+    def createMainTable(self):
+        conn = sqlite3.connect("DMA.db")
+        cur = conn.cursor()
+        #cur.execute('DROP TABLE IF EXISTS mainTable')
+        cur.execute("""CREATE TABLE IF NOT EXISTS mainTable(     
+        question TEXT PRIMARY KEY,
+        answer TEXT,
+        picture_only INTEGER,
+        level INTEGER,
+        deck INTEGER,
+        pic_front TEXT,
+        pic_back TEXT,
+        group_name TEXT,
+        subGroup TEXT,
+        package TEXT);""")
+        conn.commit()
+        conn.close()
+
+    def createThesaurusTable(self):
+        conn = sqlite3.connect("DMA.db")
+        cur = conn.cursor()
+        #cur.execute('DROP TABLE IF EXISTS thesaurus')
+        cur.execute("""CREATE TABLE IF NOT EXISTS thesaurus(
+        group_name TEXT PRIMARY KEY,
+        subGroups TEXT);""")
+        conn.commit()
+        conn.close()
+
+    def createPackageTable(self):
+        conn = sqlite3.connect("DMA.db")
+        cur = conn.cursor()
+        #cur.execute('DROP TABLE IF EXISTS packages')
+        cur.execute("""CREATE TABLE IF NOT EXISTS packages(
+        package TEXT PRIMARY KEY);""")
+
+        conn.commit()
+        conn.close()
+
+    def insertCard(self):
+        conn = sqlite3.connect("DMA.db")
+        cur = conn.cursor()
+
+        if self.pictureCard:
+            pic = 1;
+        else:
+            pic = 0
+        
+        questionField = self.questionField
+        answerField = self.answerField
+        level = self.level
+        deck = self.deck
+        qPicName = self.qPicName        
+        aPicName = self.aPicName
+        questionGroup = self.questionGroup
+        questionSubGroup = self.questionSubGroup
+        questionPackage = self.questionPackage
+    
+
+        cur.execute(f'INSERT INTO mainTable VALUES("{questionField}", "{answerField}", {pic}, {level}, {deck}, "{qPicName}", "{aPicName}", "{questionGroup}", "{questionSubGroup}", "{questionPackage}");')
+        
+        conn.commit()
+        
+        # TODO Insert data into thesaurus and packages tables too AFTER clicking the add button
+
+        conn.close()
+
+    def dbInit(self):
+        self.createMainTable()
+        self.createThesaurusTable()
+        self.createPackageTable()
+
     def qName(self, txt):
-        pattern = re.compile('[^a-zA-Z]')
+        pattern = re.compile('[^a-zA-Z0-9]')
         print(pattern.sub('', txt))
         return pattern.sub('',txt)
 
@@ -38,35 +110,61 @@ class Ui_MainWindow(QMainWindow):
 
     def clearForm(self):
         print("Clear clicked")
+        self.thesaurus.currentIndexChanged.connect(self.thesaurusSelected)
+        self.packages.currentIndexChanged.connect(self.packageSelected)
+        self.thesaurusInit()
+        self.packageInit()        
         self.questionText.setText("")
         self.answerText.setText("")
         self.qPicture_2.setPixmap(self.pixmap)
         self.aPicture_2.setPixmap(self.pixmap2)
-        self.thesaurusInit()
-        self.packageInit()
         if(self.pictureCard):
             self.question = ""+str(randint(10000, 1000000))
 
     def thesaurusInit(self):
-        self.thesaurus.addItem("Choose a group")
-        self.thesaurus.addItem("homonyms")
+        print("Thesaurus init")
+        self.thesaurus.clear()
+        self.groupData.clear()
+        self.groupData.append("Choose a group")
+        self.groupData.append("homonyms")
+        self.thesaurus.addItems(self.groupData)
+#        self.thesaurus.model().item(0).setEnabled(False)
         self.thesaurus.setCurrentIndex(0)
 
+    def thesaurusSelected(self, indx):
+        print("Thesaurus index: "+str(indx))
+        if(indx == 0):
+            self.questionGroup = "none"
+        else:
+            self.questionGroup = self.groupData[indx]
+        #self.questionSubGroup = self.subGroupData(indx) 
+        print(self.questionGroup)
+
+    def packageSelected(self, indx):
+        print("Package index: "+str(indx))
+        if(indx == 0):
+            self.questionPackage = "none"
+        else:
+            self.questionPackage = self.packageData[indx]
+
     def packageInit(self):
-        self.packages.addItem("Default package")
-        self.packages.addItem("English")
-        self.packages.addItem("French")
+        self.packages.clear()
+        self.packageData.clear()
+        self.packageData.append("Default package")
+        self.packageData.append("General")
+        self.packageData.append("English")
+        self.packageData.append("French")
+        self.packages.addItems(self.packageData)
+        self.packages.model().item(0).setEnabled(False)
         self.packages.setCurrentIndex(0)
 
     def boxPartInit(self):
+        self.boxPart.clear()
         self.partData = []
         self.boxPart.addItem("Level")
-        self.partData.append("1")
-        self.partData.append("2")
-        self.partData.append("3")
-        self.partData.append("4")
-        self.partData.append("5")
-
+        for i in range (1, 6):
+            self.partData.append(str(i))
+        
         self.boxPart.addItems(self.partData)
 
         self.boxPart.setCurrentIndex(0)
@@ -75,50 +173,35 @@ class Ui_MainWindow(QMainWindow):
     def partSectionInit(self):
         self.partSection.clear()
         self.partSection.addItem("Deck")
-#        self.partSection.addItem("1")
         self.partSection.setCurrentIndex(0)
         self.partSection.model().item(0).setEnabled(False)
+
+    def sectionSet(self, section):
+        self.deck = section
 
     def sectionUpdate(self, part):
         self.sectionData = []
         self.partSection.clear()
+        self.level = part
         self.partSection.addItem("Deck")
         if part == 1:
             self.sectionData.append("1")
+        
         elif part == 2:
             self.sectionData.append("1")
             self.sectionData.append("2")
+        
         elif part == 3:
-            self.sectionData.append("1")
-            self.sectionData.append("2")
-            self.sectionData.append("3")
-            self.sectionData.append("4")
+            for i in range(1, 5):
+                self.sectionData.append(str(i))
+                
         elif part == 4:
-            self.sectionData.append("1")
-            self.sectionData.append("2")
-            self.sectionData.append("3")
-            self.sectionData.append("4")
-            self.sectionData.append("5")
-            self.sectionData.append("6")
-            self.sectionData.append("7")
-            self.sectionData.append("8")
+            for i in range(1, 9):
+                self.sectionData.append(str(i))
+
         elif part == 5:
-            self.sectionData.append("1")
-            self.sectionData.append("2")
-            self.sectionData.append("3")
-            self.sectionData.append("4")
-            self.sectionData.append("5")
-            self.sectionData.append("6")
-            self.sectionData.append("7")
-            self.sectionData.append("8")
-            self.sectionData.append("9")
-            self.sectionData.append("10")
-            self.sectionData.append("11")
-            self.sectionData.append("12")
-            self.sectionData.append("13")
-            self.sectionData.append("14")
-            self.sectionData.append("15")
-            self.sectionData.append("16")
+            for i in range (1, 17):
+                self.sectionData.append(str(i))
 
         self.partSection.addItems(self.sectionData)
         self.partSection.setCurrentIndex(0)
@@ -148,6 +231,7 @@ class Ui_MainWindow(QMainWindow):
             #remove the previous photo from Images directory, then copy the new one
             filename = QFileDialog.getOpenFileName(self, 'Open file', self.picPath, "Image files (*.jpg *.png)")
             if(filename[0]):
+                self.qSrc = filename[0]
                 os.remove(dst)
                 copyfile(filename[0], dst)
                 image = Image.open(filename[0])
@@ -157,6 +241,7 @@ class Ui_MainWindow(QMainWindow):
                 elif self.findOrientation(image) == 8:
                     pixmp = pixmp.transformed(QtGui.QTransform().rotate(-90))
                 picname = os.path.basename(filename[0])
+                self.qPicName = os.path.basename(dst)
                 picpath = filename[0].replace(picname, "")
                 self.picPath = picpath
 
@@ -170,6 +255,7 @@ class Ui_MainWindow(QMainWindow):
             print( '2 '+dst)
             filename = QFileDialog.getOpenFileName(self, 'Open file', self.picPath, "Image files (*.jpg *.png)")
             if filename[0]:
+                self.qSrc = filename[0]
                 copyfile(filename[0], dst)
                 image = Image.open(filename[0])
                 pixmp = QtGui.QPixmap(dst).scaled(311, 901, QtCore.Qt.KeepAspectRatio, QtCore.Qt.FastTransformation)
@@ -188,6 +274,7 @@ class Ui_MainWindow(QMainWindow):
         elif (os.path.exists(dst2) and self.aPictureSet == True and self.qPictureSet == False):
             filename = QFileDialog.getOpenFileName(self, 'Open file', self.picPath, "Image files (*.jpg *.png)")
             if(filename[0]):
+                self.qSrc = filename[0]
                 copyfile(filename[0], dst)
                 image = Image.open(filename[0])
                 pixmp = QtGui.QPixmap(dst).scaled(311, 901, QtCore.Qt.KeepAspectRatio, QtCore.Qt.FastTransformation)
@@ -198,6 +285,7 @@ class Ui_MainWindow(QMainWindow):
 
                 picname = os.path.basename(filename[0])
                 picpath = filename[0].replace(picname, "")
+                self.qPicName = os.path.basename(dst)
                 self.picPath = picpath
                 self.qPicture_2.setPixmap(pixmp)
                 self.qPictureSet = True
@@ -206,6 +294,7 @@ class Ui_MainWindow(QMainWindow):
             print('3 '+dst)
             filename = QFileDialog.getOpenFileName(self, 'Open file', self.picPath, "Image files (*.jpg *.png)")
             if filename[0]:
+                self.qSrc = filename[0]
                 copyfile(filename[0], dst)
                 image = Image.open(filename[0])
                 pixmp = QtGui.QPixmap(dst).scaled(311, 901, QtCore.Qt.KeepAspectRatio, QtCore.Qt.FastTransformation)
@@ -217,6 +306,7 @@ class Ui_MainWindow(QMainWindow):
 
                 picname = os.path.basename(filename[0])
                 picpath = filename[0].replace(picname, "")
+                self.qPicName = os.path.basename(dst)
                 self.picPath = picpath
                 self.qPicture_2.setPixmap(pixmp)
                 self.qPictureSet = True
@@ -224,6 +314,7 @@ class Ui_MainWindow(QMainWindow):
             print('4 '+dst)
             filename = QFileDialog.getOpenFileName(self, 'Open file', self.picPath, "Image files (*.jpg *.png)")
             if(filename[0]):
+                self.qSrc = filename[0]
                 copyfile(filename[0], dst)
                 image = Image.open(filename[0])
                 pixmp = QtGui.QPixmap(dst).scaled(311, 901, QtCore.Qt.KeepAspectRatio, QtCore.Qt.FastTransformation)
@@ -235,10 +326,8 @@ class Ui_MainWindow(QMainWindow):
                 picpath = filename[0].replace(picname, "")
                 self.picPath = picpath
                
-
                 self.qPicture_2.setPixmap(pixmp)
                 self.qPictureSet = True
-
     
 
     def pickAnswerImage(self, other):
@@ -264,6 +353,7 @@ class Ui_MainWindow(QMainWindow):
         elif (os.path.exists(dst) and self.aPictureSet == True):
             filename = QFileDialog.getOpenFileName(self, 'Open file', self.picPath, "Image files (*.jpg *.png)")
             if filename[0]:
+                self.aSrc = filename[0]
                 os.remove(dst)
                 copyfile(filename[0], dst)
                 image = Image.open(filename[0])
@@ -274,8 +364,10 @@ class Ui_MainWindow(QMainWindow):
                     pixmp2 = pixmp2.transformed(QtGui.QTransform().rotate(-90))
 
                 picname = os.path.basename(filename[0])
+                self.aPicName = os.path.basename(dst)
                 picpath = filename[0].replace(picname, "")
                 self.picPath = picpath
+                self.aPicPath = dst
                 self.aPicture_2.setPixmap(pixmp2)
                 self.aPictureSet = True
 
@@ -283,6 +375,7 @@ class Ui_MainWindow(QMainWindow):
             print('2')
             filename = QFileDialog.getOpenFileName(self, 'Open file', self.picPath, "Image files (*.jpg *.png)")
             if filename[0]:
+                self.aSrc = filename[0]
                 copyfile(filename[0], dst)
                 image = Image.open(filename[0])
                 pixmp2 = QtGui.QPixmap(dst).scaled(311, 901, QtCore.Qt.KeepAspectRatio, QtCore.Qt.FastTransformation)
@@ -291,9 +384,9 @@ class Ui_MainWindow(QMainWindow):
                 elif self.findOrientation(image) == 8:
                     pixmp2 = pixmp2.transformed(QtGui.QTransform().rotate(-90))
 
-
                 picname = os.path.basename(filename[0])
                 picpath = filename[0].replace(picname, "")
+                self.aPicName = os.path.basename(dst)
                 self.picPath = picpath
                 self.aPicture_2.setPixmap(pixmp2)
                 self.aPictureSet = True
@@ -304,6 +397,7 @@ class Ui_MainWindow(QMainWindow):
             print("After modification: "+self.question)
             filename = QFileDialog.getOpenFileName(self, 'Open file', self.picPath, "Image files (*.jpg *.png)")
             if(filename[0]):
+                self.aSrc = filename[0]
                 copyfile(filename[0], dst)
                 image = Image.open(filename[0])
                 pixmp2 = QtGui.QPixmap(dst).scaled(311, 901, QtCore.Qt.KeepAspectRatio, QtCore.Qt.FastTransformation)
@@ -312,8 +406,8 @@ class Ui_MainWindow(QMainWindow):
                 elif self.findOrientation(image) == 8:
                     pixmp2 = pixmp2.transformed(QtGui.QTransform().rotate(-90))
 
-
                 picname = os.path.basename(filename[0])
+                
                 picpath = filename[0].replace(picname, "")
                 self.picPath = picpath
                 self.aPicture_2.setPixmap(pixmp2)
@@ -322,6 +416,7 @@ class Ui_MainWindow(QMainWindow):
         elif (os.path.exists(dst2) and self.pictureCard == True and self.qPictureSet == True and self.aPictureSet == False):
             filename = QFileDialog.getOpenFileName(self, 'Open file', self.picPath, "Image files (*.jpg *.png)")
             if(filename[0]):
+                self.aSrc = filename[0]
                 copyfile(filename[0], dst)
                 image = Image.open(filename[0])
 
@@ -331,6 +426,7 @@ class Ui_MainWindow(QMainWindow):
                 elif self.findOrientation(image) == 8:
                     pixmp2 = pixmp2.transformed(QtGui.QTransform().rotate(-90))
                 picname = os.path.basename(filename[0])
+                
                 picpath = filename[0].replace(picname, "")
                 self.picPath = picpath
 
@@ -341,6 +437,7 @@ class Ui_MainWindow(QMainWindow):
             print('4 '+dst)
             filename = QFileDialog.getOpenFileName(self, 'Open file', self.picPath, "Image files (*.jpg *.png)")
             if(filename[0]):
+                self.aSrc = filename[0]
                 copyfile(filename[0], dst)
                 image = Image.open(filename[0])
                 pixmp2 = QtGui.QPixmap(dst).scaled(311, 901, QtCore.Qt.KeepAspectRatio, QtCore.Qt.FastTransformation)
@@ -372,35 +469,108 @@ class Ui_MainWindow(QMainWindow):
         playsound(name+".mp3")
         """
 
-    def enter_data(self):
-        # TODO should rename the pictures if the question text or pictureCard flag has been changed (compare the file names and rename the pictures if necessary
+    def enterData(self):
+        """ TODO should rename the pictures if the question text or pictureCard flag has been changed (compare the file names and rename the pictures if necessary"""
+        
+        self.question = self.qName(self.questionText.toPlainText())
+        if (self.pictureCard == False and self.question+"_front.jpg" != self.qPicName and self.qPictureSet):
+            print(self.question+"_front.jpg")
+            if(os.path.exists("Images/"+self.question+"_front.jpg")):
+                print("exists")
+                #can't add
+                err = QMessageBox()
+                err.setText("You already have this question, try another one!")
+                err.setWindowTitle("Duplicate question")
+                err.setStandardButtons(QMessageBox.Ok)
+                err.exec_()
+            elif os.path.exists("Images/"+self.qPicName):
+                print("Rename")
+                os.rename("Images/"+self.qPicName, "Images/"+self.question+"_front.jpg")
+                self.qPicName = self.question+"_front.jpg"
+            elif (os.path.exists("Images/"+self.qPicName) == False):
+                print("qPicName doesn't exists")
+                copyfile(self.qSrc, "Images/"+self.question+"_front.jpg")
+                self.qPicName = self.question+"_front.jpg"
 
-        # TODO if the boxPart and partSection comboBoxes are not selected (0, 0) => the card should go to the first level first deck
+        if (self.pictureCard == False and self.question+"_back.jpg" != self.aPicName and self.aPictureSet):
+            if(os.path.exists("Images/"+self.question+"_back.jpg")):
+                #can't add
+                err = QMessageBox()
+                err.setText("You already have this question, try another one!")
+                err.setWindowTitle("Duplicate question")
+                err.setStandardButtons(QMessageBox.Ok)
+                err.exec_()
+            elif (os.path.exists("Images/"+self.aPicName)):
+                os.rename("Images/"+self.qPicName, "Images/"+self.question+"_back.jpg")
+                self.aPicName = self.question+"_back.jpg"
+            elif (os.path.exists("Images/"+self.aPicName) == False):
+                copyfile(self.aSrc, "Images/"+self.question+"_back.jpg")
+                self.aPicName = self.question+"_back.jpg"
+                
+                # TODO if the boxPart and partSection comboBoxes are not selected (0, 0) => the card should go to the first level first deck
+        if (self.boxPart.currentIndex() == 0):
+            self.level = 1
+        else:
+            self.level = self.boxPart.currentIndex()
 
-        pass
+        if(self.partSection.currentIndex() == 0):
+            self.deck = 1
+        else:
+            self.deck = self.partSection.currentIndex()
+        
+        # TODO replace nonalphanumeric characters from strings to save to the database
+        if(self.pictureCard == False):
+            tmp = self.questionText.toPlainText().replace("'", "''")
+            self.questionField = tmp.replace('"', '""')
 
+            tmp = self.answerText.toPlainText().replace("'", "''")
+            self.answerField = tmp.replace('"', '""')
+
+        self.insertCard()
+        # TODO insert new row into the database
+        
     
     def pictureCardCheck(self):
         if(self.justPicture.isChecked()):
             self.questionText.setReadOnly(True)
             self.answerText.setReadOnly(True)
             self.pictureCard = True
+            self.questionText.setVisible(False)
+            self.answerText.setVisible(False)
             self.question = ""+str(randint(10000, 100000000000))
             print(self.question)
+            self.questionField = self.question
+            self.answerField = self.question
         else:
             self.questionText.setReadOnly(False)
             self.answerText.setReadOnly(False)
+            self.answerText.setVisible(True)
+            self.questionText.setVisible(True)
             self.pictureCard = False
 
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("Digital Memory Assistant")
         MainWindow.resize(800, 600)
         self.question = '321657484984968'
+        self.questionField = ""
+        self.answerField = ""
         self.pictureCard = False
         self.qPictureSet = False
+        self.qSrc = ""
+        self.qPicName = "none"
+        self.aPicName = "none"
+        self.aSrc = ""
         self.aPictureSet = False
         self.qwidget = self
         self.picPath = '/home'
+        self.level = 1
+        self.deck = 1
+        self.questionGroup = "none"
+        self.questionSubGroup = "none"
+        self.questionPackage = "none"
+        self.groupData = []
+        self.packageData = []
+
         self.centralwidget = QtWidgets.QWidget(MainWindow)
         self.centralwidget.setObjectName("centralwidget")
         self.verticalLayout = QtWidgets.QVBoxLayout(self.centralwidget)
@@ -448,6 +618,7 @@ class Ui_MainWindow(QMainWindow):
         sizePolicy.setHeightForWidth(self.partSection.sizePolicy().hasHeightForWidth())
         self.partSection.setSizePolicy(sizePolicy)
         self.partSection.setObjectName("BoxPart")
+        self.partSection.currentIndexChanged.connect(self.sectionSet)
         self.horizontalLayout_0.addWidget(self.partSection)
 
 
@@ -603,6 +774,7 @@ class Ui_MainWindow(QMainWindow):
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.enter_2.sizePolicy().hasHeightForWidth())
         self.enter_2.setSizePolicy(sizePolicy)
+        self.enter_2.clicked.connect(self.enterData)
         self.enter_2.setObjectName("enter_2")
         self.horizontalLayout_7.addWidget(self.enter_2)
         self.clear = QtWidgets.QPushButton(self.scrollAreaWidgetContents_3)
@@ -634,10 +806,13 @@ class Ui_MainWindow(QMainWindow):
         self.statusbar.setObjectName("statusbar")
         MainWindow.setStatusBar(self.statusbar)
 
+        self.thesaurus.currentIndexChanged.connect(self.thesaurusSelected)
+        self.packages.currentIndexChanged.connect(self.packageSelected)
         self.thesaurusInit()
         self.packageInit()
         self.boxPartInit()
         self.partSectionInit()
+        self.dbInit()
 
         self.retranslateUi(MainWindow)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
